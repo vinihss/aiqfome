@@ -1,0 +1,340 @@
+definitions:
+  http_interfaces_authentication.AuthenticationResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  http_interfaces_authentication.CreateAuthenticationRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+    required:
+    - email
+    - name
+    type: object
+  http_interfaces_customer.CreateCustomerRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+    required:
+    - email
+    - name
+    type: object
+  http_interfaces_customer.CustomerResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  http_interfaces_customer.UpdateCustomerRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+    type: object
+  http_interfaces_favorite.CreateFavoriteRequest:
+    properties:
+      customer_id:
+        type: string
+      product_id:
+        type: string
+    required:
+    - customer_id
+    - product_id
+    type: object
+  http_interfaces_favorite.FavoriteResponse:
+    properties:
+      customer_id:
+        type: string
+      id:
+        type: string
+      product:
+        type: string
+      product_id:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: API para favoritar produtos
+  title: Favorite API
+  version: "1.0"
+paths:
+  /authenticate:
+    post:
+      consumes:
+      - application/json
+      description: Creates a JWT token for the user
+      parameters:
+      - description: Authentication data
+        in: body
+        name: auth
+        required: true
+        schema:
+          $ref: '#/definitions/http_interfaces_authentication.CreateAuthenticationRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http_interfaces_authentication.AuthenticationResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create authentication token
+      tags:
+      - authentication
+  /customer:
+    post:
+      consumes:
+      - application/json
+      description: Creates a favorite for a given customer and product
+      parameters:
+      - description: Customer data
+        in: body
+        name: favorite
+        required: true
+        schema:
+          $ref: '#/definitions/http_interfaces_customer.CreateCustomerRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http_interfaces_customer.CustomerResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add customer product
+      tags:
+      - customer
+  /customer/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a customer by their ID
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Delete customer
+      tags:
+      - customer
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a customer's information by their ID
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http_interfaces_customer.CustomerResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get customer by ID
+      tags:
+      - customer
+    put:
+      consumes:
+      - application/json
+      description: Updates a customer's information by their ID
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated customer data
+        in: body
+        name: customer
+        required: true
+        schema:
+          $ref: '#/definitions/http_interfaces_customer.UpdateCustomerRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http_interfaces_customer.CustomerResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update customer
+      tags:
+      - customer
+  /customers:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a paginated list of customers
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/http_interfaces_customer.CustomerResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get all customers
+      tags:
+      - customer
+  /favorites:
+    post:
+      consumes:
+      - application/json
+      description: Creates a favorite for a given customer and product
+      parameters:
+      - description: Favorite data
+        in: body
+        name: favorite
+        required: true
+        schema:
+          $ref: '#/definitions/http_interfaces_favorite.CreateFavoriteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http_interfaces_favorite.FavoriteResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Add favorite product
+      tags:
+      - favorites
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
