@@ -1,11 +1,8 @@
 package models
 
-import "gorm.io/gorm"
-
 type Favorite struct {
-	gorm.Model
-	ID         string `gorm:"primaryKey"`
-	CustomerID string
-	ProductID  string
-	Product    string
+	ID         uint   `gorm:"primaryKey"`
+	CustomerID uint   `gorm:"not null;index;uniqueIndex:uniq_customer_product"`
+	ProductID  uint   `gorm:"not null;uniqueIndex:uniq_customer_product"`
+	Product    string `gorm:"not null"`
 }

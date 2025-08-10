@@ -19,7 +19,7 @@ func NewAuthenticationHandler(c *AuthenticationController) *AuthenticationHandle
 // Authenticate godoc
 // @Summary Create authentication token
 // @Description Creates a JWT token for the user
-// @Tags authentication
+// @Tags Authentication
 // @Accept json
 // @Produce json
 // @Param auth body CreateAuthenticationRequest true "Authentication data"

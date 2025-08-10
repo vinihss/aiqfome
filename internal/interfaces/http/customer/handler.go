@@ -1,10 +1,10 @@
 package http_interfaces_customer
 
 import (
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
-
-	"github.com/gin-gonic/gin"
+	"strings"
 )
 
 type CustomerHandler struct {
@@ -15,10 +15,10 @@ func NewCustomerHandler(controller *CustomerController) *CustomerHandler {
 	return &CustomerHandler{controller: controller}
 }
 
-// AddCustomer godoc
+// Create godoc
 // @Summary Add customer product
 // @Description Creates a favorite for a given customer and product
-// @Tags customer
+// @Tags Customer
 // @Accept json
 // @Produce json
 // @Param favorite body CreateCustomerRequest true "Customer data"
@@ -27,7 +27,7 @@ func NewCustomerHandler(controller *CustomerController) *CustomerHandler {
 // @Failure 500 {object} map[string]string
 // @Router /customer [post]
 // @Security BearerAuth
-func (h *CustomerHandler) AddCustomer(c *gin.Context) {
+func (h *CustomerHandler) Create(c *gin.Context) {
 	var req CreateCustomerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -36,6 +36,10 @@ func (h *CustomerHandler) AddCustomer(c *gin.Context) {
 
 	res, err := h.controller.CreateCustomer(req)
 	if err != nil {
+		if isUniqueEmailErr(err) {
+			c.JSON(http.StatusConflict, gin.H{"error": "email already registered"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -43,10 +47,10 @@ func (h *CustomerHandler) AddCustomer(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-// DeleteCustomer godoc
+// Delete godoc
 // @Summary Delete customer
 // @Description Deletes a customer by their ID
-// @Tags customer
+// @Tags Customer
 // @Accept json
 // @Produce json
 // @Param id path int true "Customer ID"
@@ -55,7 +59,7 @@ func (h *CustomerHandler) AddCustomer(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /customer/{id} [delete]
 // @Security BearerAuth
-func (h *CustomerHandler) DeleteCustomer(c *gin.Context) {
+func (h *CustomerHandler) Delete(c *gin.Context) {
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -71,10 +75,10 @@ func (h *CustomerHandler) DeleteCustomer(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Customer deleted successfully"})
 }
 
-// UpdateCustomer godoc
+// Update godoc
 // @Summary Update customer
 // @Description Updates a customer's information by their ID
-// @Tags customer
+// @Tags Customer
 // @Accept json
 // @Produce json
 // @Param id path int true "Customer ID"
@@ -84,7 +88,7 @@ func (h *CustomerHandler) DeleteCustomer(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /customer/{id} [put]
 // @Security BearerAuth
-func (h *CustomerHandler) UpdateCustomer(c *gin.Context) {
+func (h *CustomerHandler) Update(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
@@ -99,6 +103,10 @@ func (h *CustomerHandler) UpdateCustomer(c *gin.Context) {
 
 	res, err := h.controller.UpdateCustomer(uint(id), req)
 	if err != nil {
+		if isUniqueEmailErr(err) {
+			c.JSON(http.StatusConflict, gin.H{"error": err})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -106,10 +114,10 @@ func (h *CustomerHandler) UpdateCustomer(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-// GetCustomerByID godoc
+// FindByID godoc
 // @Summary Get customer by ID
 // @Description Retrieves a customer's information by their ID
-// @Tags customer
+// @Tags Customer
 // @Accept json
 // @Produce json
 // @Param id path int true "Customer ID"
@@ -119,7 +127,7 @@ func (h *CustomerHandler) UpdateCustomer(c *gin.Context) {
 // @Failure 500 {object} map[string]string
 // @Router /customer/{id} [get]
 // @Security BearerAuth
-func (h *CustomerHandler) GetCustomerByID(c *gin.Context) {
+func (h *CustomerHandler) FindByID(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID format"})
@@ -138,7 +146,7 @@ func (h *CustomerHandler) GetCustomerByID(c *gin.Context) {
 // GetAllCustomers godoc
 // @Summary Get all customers
 // @Description Retrieves a paginated list of customers
-// @Tags customer
+// @Tags Customer
 // @Accept json
 // @Produce json
 // @Param page query int false "Page number"
@@ -159,4 +167,14 @@ func (h *CustomerHandler) GetAllCustomers(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, res)
+}
+
+func isUniqueEmailErr(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := strings.ToLower(err.Error())
+
+	return (strings.Contains(msg, "unique") || strings.Contains(msg, "duplicate") || strings.Contains(msg, "already exists")) &&
+		strings.Contains(msg, "email")
 }

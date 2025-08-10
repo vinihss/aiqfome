@@ -1,8 +1,8 @@
 package favorite
 
 type Favorite struct {
-	ID         string
-	CustomerID string
-	ProductID  string
+	ID         uint
+	CustomerID uint
+	ProductID  uint
 	Product    string
 }

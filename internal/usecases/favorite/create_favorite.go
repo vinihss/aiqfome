@@ -9,8 +9,8 @@ type FavoriteRepository interface {
 }
 
 type CreateFavoriteInput struct {
-	CustomerID string
-	ProductID  string
+	CustomerID uint
+	ProductID  uint
 }
 
 type CreateFavoriteUseCase struct {

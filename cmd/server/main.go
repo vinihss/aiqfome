@@ -47,6 +47,14 @@ func (s *Server) Run() error {
 // @name Authorization
 // @BasePath /
 func main() {
+
+	// load env from os
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
 	server := NewServer(":8080")
 	err := server.Run()
 	if err != nil {

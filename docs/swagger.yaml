@@ -17,8 +17,11 @@ definitions:
   http_interfaces_customer.CreateCustomerRequest:
     properties:
       email:
+        maxLength: 254
         type: string
       name:
+        maxLength: 100
+        minLength: 2
         type: string
     required:
     - email
@@ -36,30 +39,30 @@ definitions:
   http_interfaces_customer.UpdateCustomerRequest:
     properties:
       email:
+        maxLength: 254
         type: string
       name:
+        maxLength: 100
+        minLength: 2
         type: string
     type: object
-  http_interfaces_favorite.CreateFavoriteRequest:
+  http_interfaces_favorite.AddFavoriteRequest:
     properties:
-      customer_id:
-        type: string
       product_id:
-        type: string
+        type: integer
     required:
-    - customer_id
     - product_id
     type: object
   http_interfaces_favorite.FavoriteResponse:
     properties:
       customer_id:
-        type: string
+        type: integer
       id:
-        type: string
+        type: integer
       product:
         type: string
       product_id:
-        type: string
+        type: integer
     type: object
 info:
   contact: {}
@@ -102,7 +105,7 @@ paths:
       - BearerAuth: []
       summary: Create authentication token
       tags:
-      - authentication
+      - Authentication
   /customer:
     post:
       consumes:
@@ -138,7 +141,7 @@ paths:
       - BearerAuth: []
       summary: Add customer product
       tags:
-      - customer
+      - Customer
   /customer/{id}:
     delete:
       consumes:
@@ -175,7 +178,7 @@ paths:
       - BearerAuth: []
       summary: Delete customer
       tags:
-      - customer
+      - Customer
     get:
       consumes:
       - application/json
@@ -215,7 +218,7 @@ paths:
       - BearerAuth: []
       summary: Get customer by ID
       tags:
-      - customer
+      - Customer
     put:
       consumes:
       - application/json
@@ -255,7 +258,137 @@ paths:
       - BearerAuth: []
       summary: Update customer
       tags:
-      - customer
+      - Customer
+  /customer/{id}/favorites:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/http_interfaces_favorite.FavoriteResponse'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Listar favoritos do cliente
+      tags:
+      - Favorites
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Produto favorito
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/http_interfaces_favorite.AddFavoriteRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/http_interfaces_favorite.FavoriteResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Adicionar produto aos favoritos do cliente
+      tags:
+      - Favorites
+  /customer/{id}/favorites/{productId}:
+    delete:
+      consumes:
+      - application/json
+      parameters:
+      - description: Customer ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Product ID
+        in: path
+        name: productId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Remover produto dos favoritos do cliente
+      tags:
+      - Favorites
   /customers:
     get:
       consumes:
@@ -295,43 +428,7 @@ paths:
       - BearerAuth: []
       summary: Get all customers
       tags:
-      - customer
-  /favorites:
-    post:
-      consumes:
-      - application/json
-      description: Creates a favorite for a given customer and product
-      parameters:
-      - description: Favorite data
-        in: body
-        name: favorite
-        required: true
-        schema:
-          $ref: '#/definitions/http_interfaces_favorite.CreateFavoriteRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/http_interfaces_favorite.FavoriteResponse'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            additionalProperties:
-              type: string
-            type: object
-      security:
-      - BearerAuth: []
-      summary: Add favorite product
-      tags:
-      - favorites
+      - Customer
 securityDefinitions:
   BearerAuth:
     in: header

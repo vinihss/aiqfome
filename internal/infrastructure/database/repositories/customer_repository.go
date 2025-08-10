@@ -18,7 +18,7 @@ func NewCustomerRepository(db *gorm.DB) *CustomerRepository {
 func (r *CustomerRepository) Create(f customer.Customer) (customer.Customer, error) {
 	model := models.Customer{
 		Name:  f.Name,
-		Email: f.Name,
+		Email: f.Email,
 	}
 
 	if err := r.db.Create(&model).Error; err != nil {
