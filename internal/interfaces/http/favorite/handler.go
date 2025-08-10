@@ -27,7 +27,7 @@ func NewFavoriteHandler(controller *FavoriteController) *FavoriteHandler {
 // @Accept json
 // @Produce json
 // @Param id path int true "Customer ID"
-// @Param body AddFavoriteRequest true "Produto favorito"
+// @Param body body AddFavoriteRequest true "Produto favorito"
 // @Success 201 {object} FavoriteResponse
 // @Failure 400 {object} map[string]string
 // @Failure 404 {object} map[string]string

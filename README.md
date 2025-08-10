@@ -3,7 +3,7 @@
 Microserviço responsável por gerenciar produtos favoritos dos clientes, com alta disponibilidade e performance.
 
 ## Funcionalidades
-
+- Adicionar produtos aos favoritos
 - Adicionar produtos aos favoritos
 - Listar produtos favoritos com detalhes (ID, título, imagem, preço e review)
 - Remover produtos dos favoritos
@@ -22,28 +22,23 @@ Microserviço responsável por gerenciar produtos favoritos dos clientes, com al
 - Docker & Docker Compose
 - Make
 
-## Como executar
-
-### Desenvolvimento local
-
-```bash
-# Iniciar todos os serviços com Docker Compose
-make docker-compose
-
-# Executar a aplicação localmente (fora do Docker)
-make run
-
-# Rodar testes
-make test
+## Como Utilizar
+- Subir os containers da aplicação
 ```
-
-### Produção
-
-```bash
-# Fazer build e push da imagem Docker
-make deploy
+docker-composer up -d
 ```
-
+- A documentação estará disponível em: http://localhost:8080/swagger/index.html
+- Realizar autenticão no endpoint authenticate. Os parametros são apenas demostrativos, e irá retornar um token de deve ser utilizado nos demais endpoins.
+```
+{
+  "email": "string",
+  "name": "string"
+}
+```
+- Utilizar o token no header da seguinte maneira:
+```
+Bearer <token>
+```
 ## Estrutura do Projeto
 
 ```
