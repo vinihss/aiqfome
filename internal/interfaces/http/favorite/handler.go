@@ -48,7 +48,7 @@ func (h *FavoriteHandler) Create(c *gin.Context) {
 	}
 	fav, err := h.controller.Add(c.Request.Context(), uint(customerID), req.ProductID)
 	if err != nil {
-		// Mapeamento dos erros mais comuns
+
 		if err == usecase.ErrAlreadyFavorited {
 			c.JSON(http.StatusConflict, gin.H{"error": "produto já favoritado para este cliente"})
 			return
@@ -65,7 +65,7 @@ func (h *FavoriteHandler) Create(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, ToFavoriteResponse(fav.ID, fav.CustomerID, fav.ProductID, fav.Product))
+	c.JSON(http.StatusCreated, ToFavoriteResponse(fav.ID, fav.CustomerID, fav.ProductID, fav.Title, fav.ImageUrl, fav.Price))
 }
 
 // List godoc
@@ -92,7 +92,7 @@ func (h *FavoriteHandler) List(c *gin.Context) {
 	}
 	out := make([]FavoriteResponse, 0, len(items))
 	for _, it := range items {
-		out = append(out, ToFavoriteResponse(it.ID, it.CustomerID, it.ProductID, it.Product))
+		out = append(out, ToFavoriteResponse(it.ID, it.CustomerID, it.ProductID, it.Title, it.ImageUrl, it.Price))
 	}
 	c.JSON(http.StatusOK, out)
 }

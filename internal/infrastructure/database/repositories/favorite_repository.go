@@ -33,7 +33,9 @@ func (r *FavoriteRepository) Create(f domain.Favorite) (domain.Favorite, error) 
 	model := models.Favorite{
 		CustomerID: f.CustomerID,
 		ProductID:  f.ProductID,
-		Product:    f.Product,
+		Title:      f.Title,
+		ImageUrl:   f.ImageUrl,
+		Price:      f.Price,
 	}
 
 	if err := r.db.Create(&model).Error; err != nil {
@@ -44,7 +46,9 @@ func (r *FavoriteRepository) Create(f domain.Favorite) (domain.Favorite, error) 
 		ID:         model.ID,
 		CustomerID: model.CustomerID,
 		ProductID:  model.ProductID,
-		Product:    model.Product,
+		Title:      model.Title,
+		ImageUrl:   model.ImageUrl,
+		Price:      model.Price,
 	}, nil
 }
 
@@ -69,7 +73,9 @@ func (r *FavoriteRepository) ListByCustomer(customerID uint) ([]domain.Favorite,
 			ID:         m.ID,
 			CustomerID: m.CustomerID,
 			ProductID:  m.ProductID,
-			Product:    m.Product,
+			Title:      m.Title,
+			ImageUrl:   m.ImageUrl,
+			Price:      m.Price,
 		})
 	}
 	return out, nil

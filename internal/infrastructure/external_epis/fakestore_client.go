@@ -27,7 +27,6 @@ type ProductClient interface {
 	GetProduct(ctx context.Context, id uint) (ExternalProduct, error)
 }
 
-// ProductCache implementa um cache em memória para produtos
 type ProductCache struct {
 	cache map[uint]ExternalProduct
 	mutex sync.RWMutex
@@ -54,7 +53,6 @@ func (c *ProductCache) Set(id uint, product ExternalProduct) {
 	c.cache[id] = product
 }
 
-// Circuit breaker state
 type CircuitBreaker struct {
 	FailureThreshold   int
 	FailureCount       int
@@ -67,9 +65,9 @@ type CircuitBreaker struct {
 
 func NewCircuitBreaker() *CircuitBreaker {
 	return &CircuitBreaker{
-		FailureThreshold:   5,           // 5 falhas consecutivas
-		CooldownPeriod:     time.Minute, // 1 minuto no estado aberto
-		HalfOpenMaxRetries: 2,           // Tenta 2 vezes no modo semi-aberto
+		FailureThreshold:   5,
+		CooldownPeriod:     time.Minute,
+		HalfOpenMaxRetries: 2,
 	}
 }
 
@@ -77,10 +75,9 @@ func (cb *CircuitBreaker) IsOpen() bool {
 	cb.mutex.Lock()
 	defer cb.mutex.Unlock()
 
-	// Se o tempo de esfriamento passou, move para half-open
 	if cb.OpenUntil.Before(time.Now()) {
 		if cb.FailureCount >= cb.FailureThreshold {
-			cb.HalfOpenRetries = 0 // Reset para tentar alguns requests
+			cb.HalfOpenRetries = 0
 		}
 		return false
 	}
@@ -99,7 +96,6 @@ func (cb *CircuitBreaker) Failure() {
 	defer cb.mutex.Unlock()
 	cb.FailureCount++
 
-	// Se está em half-open e excedeu as tentativas, abre o circuito novamente
 	if cb.OpenUntil.Before(time.Now()) && cb.FailureCount > cb.FailureThreshold {
 		cb.HalfOpenRetries++
 		if cb.HalfOpenRetries >= cb.HalfOpenMaxRetries {
@@ -107,7 +103,6 @@ func (cb *CircuitBreaker) Failure() {
 		}
 	}
 
-	// Se atingiu o limite, abre o circuito
 	if cb.FailureCount >= cb.FailureThreshold && cb.OpenUntil.IsZero() {
 		cb.OpenUntil = time.Now().Add(cb.CooldownPeriod)
 	}
@@ -124,16 +119,16 @@ func NewFakeStoreClient() *FakeStoreClient {
 	return &FakeStoreClient{
 		baseURL: "https://fakestoreapi.com",
 		http: &http.Client{
-			Timeout: 3 * time.Second, // Reduzido para 3 segundos
+			Timeout: 3 * time.Second,
 			Transport: &http.Transport{
 				Proxy: http.ProxyFromEnvironment,
 				DialContext: (&net.Dialer{
 					Timeout:   3 * time.Second,
 					KeepAlive: 30 * time.Second,
 				}).DialContext,
-				MaxIdleConns:          200, // Aumentado para 200
-				MaxConnsPerHost:       20,  // Limita conexões por host
-				MaxIdleConnsPerHost:   10,  // Limita conexões ociosas por host
+				MaxIdleConns:          200,
+				MaxConnsPerHost:       20,
+				MaxIdleConnsPerHost:   10,
 				IdleConnTimeout:       90 * time.Second,
 				TLSHandshakeTimeout:   3 * time.Second,
 				ExpectContinueTimeout: 1 * time.Second,
@@ -145,27 +140,22 @@ func NewFakeStoreClient() *FakeStoreClient {
 }
 
 func (c *FakeStoreClient) GetProduct(ctx context.Context, id uint) (ExternalProduct, error) {
-	// Verifica se está no cache
 	if product, found := c.cache.Get(id); found {
 		return product, nil
 	}
 
-	// Verifica circuit breaker
 	if c.cb.IsOpen() {
 		return ExternalProduct{}, fmt.Errorf("circuit breaker aberto: serviço temporariamente indisponível")
 	}
 
-	// Prepara request com timeout e retry
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/products/%d", c.baseURL, id), nil)
 	if err != nil {
 		return ExternalProduct{}, err
 	}
 
-	// Adiciona headers essenciais
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("User-Agent", "aiqfome-favorites-service/1.0")
 
-	// Realiza request com retry (máx 2 tentativas)
 	var resp *http.Response
 	var lastErr error
 
@@ -177,13 +167,11 @@ func (c *FakeStoreClient) GetProduct(ctx context.Context, id uint) (ExternalProd
 
 		lastErr = err
 
-		// Se for o último retry, não espera
 		if attempt < 1 {
 			time.Sleep(100 * time.Millisecond)
 		}
 	}
 
-	// Se todas as tentativas falharam
 	if err != nil {
 		c.cb.Failure()
 		return ExternalProduct{}, fmt.Errorf("falha após retry: %w", lastErr)
@@ -191,9 +179,8 @@ func (c *FakeStoreClient) GetProduct(ctx context.Context, id uint) (ExternalProd
 
 	defer resp.Body.Close()
 
-	// Verifica status code
 	if resp.StatusCode == http.StatusNotFound {
-		c.cb.Success() // Not Found é esperado, não indica falha do serviço
+		c.cb.Success()
 		return ExternalProduct{}, ErrProductNotFound
 	}
 
@@ -202,8 +189,7 @@ func (c *FakeStoreClient) GetProduct(ctx context.Context, id uint) (ExternalProd
 		return ExternalProduct{}, fmt.Errorf("erro ao consultar API externa: status %d", resp.StatusCode)
 	}
 
-	// Lê corpo com limite (evita ataques)
-	bodyBytes, err := io.ReadAll(io.LimitReader(resp.Body, 1024*1024)) // Máx 1MB
+	bodyBytes, err := io.ReadAll(io.LimitReader(resp.Body, 1024*1024))
 	if err != nil {
 		c.cb.Failure()
 		return ExternalProduct{}, fmt.Errorf("erro ao ler resposta: %w", err)
@@ -216,14 +202,11 @@ func (c *FakeStoreClient) GetProduct(ctx context.Context, id uint) (ExternalProd
 	}
 
 	if p.ID == 0 {
-		c.cb.Success() // Resposta com formato correto
+		c.cb.Success()
 		return ExternalProduct{}, ErrProductNotFound
 	}
 
-	// Cache o produto para futuras requisições
 	c.cache.Set(id, p)
-
-	// Marca sucesso no circuit breaker
 	c.cb.Success()
 
 	return p, nil

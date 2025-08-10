@@ -22,13 +22,12 @@ func NewAddFavoriteUseCase(repo domain.Repository, client external_epis.ProductC
 }
 
 func (uc *AddFavoriteUseCase) Execute(ctx context.Context, customerID uint, productID uint) (domain.Favorite, error) {
-	// valida e obtém info do produto na API externa
+
 	product, err := uc.client.GetProduct(ctx, productID)
 	if err != nil {
 		return domain.Favorite{}, err
 	}
 
-	// evita duplicidade
 	exists, err := uc.repo.Exists(customerID, productID)
 	if err != nil {
 		return domain.Favorite{}, err
@@ -37,11 +36,13 @@ func (uc *AddFavoriteUseCase) Execute(ctx context.Context, customerID uint, prod
 		return domain.Favorite{}, ErrAlreadyFavorited
 	}
 
-	// cria favorito
 	fav := domain.Favorite{
 		CustomerID: customerID,
 		ProductID:  productID,
-		Product:    product.Title,
+		Title:      product.Title,
+		ImageUrl:   product.Image,
+		Price:      product.Price,
 	}
+
 	return uc.repo.Create(fav)
 }

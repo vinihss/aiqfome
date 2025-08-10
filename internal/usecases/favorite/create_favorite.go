@@ -11,6 +11,9 @@ type FavoriteRepository interface {
 type CreateFavoriteInput struct {
 	CustomerID uint
 	ProductID  uint
+	Title      string
+	ImageUrl   string
+	Price      float32
 }
 
 type CreateFavoriteUseCase struct {
@@ -25,7 +28,9 @@ func (uc *CreateFavoriteUseCase) Execute(input CreateFavoriteInput) (favorite.Fa
 	fav := favorite.Favorite{
 		CustomerID: input.CustomerID,
 		ProductID:  input.ProductID,
-		Product:    "Nome do Produto", // poderia vir de outro serviço/API
+		Title:      input.Title,
+		ImageUrl:   input.ImageUrl,
+		Price:      input.Price,
 	}
 	return uc.repo.Create(fav)
 }

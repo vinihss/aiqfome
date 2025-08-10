@@ -8,7 +8,6 @@ Microserviço responsável por gerenciar produtos favoritos dos clientes, com al
 - Listar produtos favoritos com detalhes (ID, título, imagem, preço e review)
 - Remover produtos dos favoritos
 - Cache distribuído para alta performance
-- Métricas e monitoramento
 
 ## Tecnologias
 
@@ -16,7 +15,6 @@ Microserviço responsável por gerenciar produtos favoritos dos clientes, com al
 - PostgreSQL
 - Redis
 - Docker & Docker Compose
-- Prometheus & Grafana
 
 ## Requisitos
 
@@ -52,7 +50,7 @@ make deploy
 .
 ├── cmd/           # Pontos de entrada da aplicação
 ├── config/        # Configurações
-├── docs/          # Documentação (Swagger, etc)
+├── docs/          # Documentação (Swagger)
 ├── internal/      # Código interno da aplicação
 │   ├── domain/    # Modelos de domínio
 │   ├── infrastructure/  # Implementações concretas
@@ -73,11 +71,6 @@ Rotas principais:
 - `POST /customer/{id}/favorites` - Adiciona produto aos favoritos
 - `DELETE /customer/{id}/favorites/{productId}` - Remove produto dos favoritos
 
-## Monitoramento
-
-- Métricas: `/metrics` (formato Prometheus)
-- Health check: `/health`
-- Grafana: `http://localhost:3000` (usuário: admin, senha: admin)
 
 ## Escalabilidade e Alta Disponibilidade
 
@@ -86,13 +79,3 @@ Este serviço foi projetado para:
 - Escalar horizontalmente (múltiplas instâncias)
 - Utilizar cache distribuído (Redis)
 - Implementar circuit breaker para API externa
-- Monitoramento em tempo real
-- Health checks para auto-recuperação
-
-## Contribuindo
-
-1. Faça fork do projeto
-2. Crie sua feature branch (`git checkout -b feature/nova-funcionalidade`)
-3. Commit suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
-4. Push para a branch (`git push origin feature/nova-funcionalidade`)
-5. Abra um Pull Request

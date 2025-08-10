@@ -20,7 +20,6 @@ func (ctrl *AuthenticationController) CreateAuthentication(req CreateAuthenticat
 	}, nil
 }
 func createToken(username string) (string, error) {
-	// Create a new JWT token with claims
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": username,                         // Subject (user identifier)
 		"iss": "aiqfome",                        // Issue

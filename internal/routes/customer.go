@@ -7,7 +7,7 @@ import (
 )
 
 func RegisterCustomerRoutes(r *gin.Engine, handler *httpfav.CustomerHandler) {
-	customerGroup := r.Group("/customers")
+	customerGroup := r.Group("/customer")
 	{
 		customerGroup.POST("/", handler.Create)
 		customerGroup.GET("/:id", handler.FindByID)

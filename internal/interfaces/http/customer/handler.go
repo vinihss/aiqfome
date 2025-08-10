@@ -154,7 +154,7 @@ func (h *CustomerHandler) FindByID(c *gin.Context) {
 // @Success 200 {array} CustomerResponse
 // @Failure 400 {object} map[string]string
 // @Failure 500 {object} map[string]string
-// @Router /customers [get]
+// @Router /customer [get]
 // @Security BearerAuth
 func (h *CustomerHandler) GetAllCustomers(c *gin.Context) {
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))

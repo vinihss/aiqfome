@@ -4,5 +4,7 @@ type Favorite struct {
 	ID         uint
 	CustomerID uint
 	ProductID  uint
-	Product    string
+	Title      string
+	ImageUrl   string
+	Price      float32
 }

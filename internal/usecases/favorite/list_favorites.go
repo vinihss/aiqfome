@@ -2,7 +2,6 @@ package favorite
 
 import (
 	"context"
-
 	domain "github.com/vinihss/aiqfome/internal/domain/favorite"
 )
 
